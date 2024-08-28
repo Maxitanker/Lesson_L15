@@ -19,38 +19,27 @@ import static org.junit.jupiter.api.Assertions.*;
 // https://www.mts.by/?hash-offset=70&hash-dur=1300#pay-section
 public class TestMTS {
     private static WebDriver driver;
-    private static WebDriverWait wait;
 
-    @BeforeAll
-    public static void setup() {
+    @BeforeEach
+    public void setup() {
         // Настройка WebDriver с использованием WebDriverManager
         WebDriverManager.chromedriver().setup();
         driver = new ChromeDriver();
-        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-    }
-
-    /*@AfterAll
-    public static void tearDown() {
-        if (driver != null) {
-            driver.quit();
-        }
-    }*/
-
-    @Test
-    @DisplayName("Открытие страницы")
-    public void launch() {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
         driver.get("https://www.mts.by/?hash-offset=70&hash-dur=1300#pay-section");
-    }
-
-    @Test
-    @DisplayName("Закрыть окно куки")
-    public void closeCookiePopup() {
         WebElement Button = wait.until(ExpectedConditions.elementToBeClickable(By.id("cookie-agree")));
         if (Button.isDisplayed()) {
             System.out.println("Окно с куками закрыто");
             Button.click();
         }
     }
+    @AfterEach
+    public void tearDown() {
+        if (driver != null) {
+            driver.quit();
+        }
+    }
+
 
     @Test
     @DisplayName("Проверка заголовка внутри страницы")
@@ -68,17 +57,26 @@ public class TestMTS {
     }
 
     @Test
-    @DisplayName("Проверка ссылки 'Подробнее о сервисе'") // не работает
-    public void testURL() {
-        driver.findElement(By.linkText("Подробнее о сервисе")).click();
+    @DisplayName("Заполнение данных для оплаты")
+    public void phone() {
+        //297777777
+        WebElement phone = driver.findElement(By.id("connection-phone"));
+        WebElement amount = driver.findElement(By.id("connection-sum"));
+
+        phone.sendKeys("297777777");
+        amount.sendKeys("100");
+
+        // Отправление формы
+        WebElement submit = driver.findElement(By.cssSelector("#pay-connection > button"));
+        submit.click();
     }
 
     @Test
-    @DisplayName("Заполнение данных для оплаты") // недоделано
-    public void phone() {
-        //297777777
+    @DisplayName("Проверка ссылки 'Подробнее о сервисе'")
+    public void testURL() {
+        WebElement submit = driver.findElement(By.linkText("Подробнее о сервисе"));
+        submit.click(); // Я не знаю почему, но у меня страница с окном "о сервисе" загружается секунд 40. Возможно дело в регионах
     }
-
 }
 
 
