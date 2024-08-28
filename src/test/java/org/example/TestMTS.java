@@ -74,8 +74,7 @@ public class TestMTS {
     @Test
     @DisplayName("Проверка ссылки 'Подробнее о сервисе'")
     public void testURL() {
-        WebElement submit = driver.findElement(By.linkText("Подробнее о сервисе"));
-        submit.click(); // Я не знаю почему, но у меня страница с окном "о сервисе" загружается секунд 40. Возможно дело в регионах
+        driver.findElement(By.linkText("Подробнее о сервисе")).click(); // Я не знаю почему, но у меня страница с окном "о сервисе" загружается секунд 40. Возможно дело в регионах
     }
 }
 
