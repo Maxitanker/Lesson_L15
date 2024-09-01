@@ -1,73 +1,46 @@
 package org.example;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.FindBy;
 
 import java.util.List;
 
 public class MTSMainPage extends BasePage {
 
-    @FindBy(id = "cookie-agree")
-    private WebElement cookieAgreeButton;
-
-    @FindBy(xpath = "//*[@id='pay-section']/div/div/div[1]/section/div/h2")
-    private WebElement headerElement;
-
-    @FindBy(className = "pay__partners")
-    private WebElement paymentLogos;
-
-    @FindBy(id = "connection-phone")
-    private WebElement phoneField;
-
-    @FindBy(id = "connection-sum")
-    private WebElement amountField;
-
-    @FindBy(css = "#pay-connection > button")
-    private WebElement submitButton;
-
-    @FindBy(linkText = "Подробнее о сервисе")
-    private WebElement moreInfoLink;
-
-    @FindBy(className = "select__header")
-    private WebElement serviceDropdown;
-
-    @FindBy(css = "select__header")
-    private List<WebElement> serviceOptions;
-
-    @FindBy(xpath = "//*[@id=\"pay-internet\"]/button")
-    private WebElement PayButton;
-
-    @FindBy(className = "pay-description__cost")
-    private WebElement PaymentCheckTop;
-
-    @FindBy(xpath = "/html/body/app-root/div/div/div/app-payment-container/section/div/div/div[2]/span")
-    private WebElement PaymentNumber;
-
-    @FindBy(id = "cc-number")
-    private WebElement PaymentCard;
-
-    @FindBy(name = "expirationDate")
-    private WebElement PaymentValidTill;
-
-    @FindBy(name = "verification_value")
-    private WebElement PaymentCVC;
-
-    @FindBy(name = "cc-name")
-    private WebElement PaymentCardholder;
-
-    @FindBy(className = "colored disabled")
-    private WebElement PaymentCheckButton;
-
+    // Локаторы
+    private By cookieAgreeButton = By.id("cookie-agree");
+    private By headerElement = By.xpath("//*[@id='pay-section']/div/div/div[1]/section/div/h2");
+    private By paymentLogos = By.className("pay__partners");
+    private By phoneField = By.id("connection-phone");
+    private By amountField = By.id("connection-sum");
+    private By submitButton = By.cssSelector("#pay-connection > button");
+    private By moreInfoLink = By.linkText("Подробнее о сервисе");
+    private By serviceDropdown = By.className("select__header");
+    /*private By serviceOptions = By.className("select__header");
+    private By payButton = By.xpath("//*[@id=\"pay-internet\"]/button");
+    private By paymentCheckTop = By.className("pay-description__cost");
+    private By paymentNumber = By.xpath("/html/body/app-root/div/div/div/app-payment-container/section/div/div/div[2]/span");
+    private By paymentCard = By.id("cc-number");
+    private By paymentValidTill = By.name("expirationDate");
+    private By paymentCVC = By.name("verification_value");
+    private By paymentCardholder = By.name("cc-name");
+    private By paymentCheckButton = By.cssSelector(".colored.disabled");*/
 
     public MTSMainPage(WebDriver driver) {
         super(driver);
     }
 
+    // Методы
+    private WebElement waitForElement(By locator) {
+        return new org.openqa.selenium.support.ui.WebDriverWait(driver, java.time.Duration.ofSeconds(10))
+                .until(driver -> driver.findElement(locator));
+    }
     public void acceptCookies() {
         try {
-            if (cookieAgreeButton.isDisplayed() && cookieAgreeButton.isEnabled()) {
-                waitAndClick(cookieAgreeButton);
+            WebElement button = waitForElement(cookieAgreeButton);
+            if (button.isDisplayed() && button.isEnabled()) {
+                button.click();
                 System.out.println("Окно с куками закрыто");
             }
         } catch (Exception e) {
@@ -75,33 +48,37 @@ public class MTSMainPage extends BasePage {
         }
     }
 
+
     public String getHeaderText() {
-        waitForElement(headerElement);
-        return headerElement.getText();
+        return waitForElement(headerElement).getText();
     }
 
     public boolean arePaymentLogosDisplayed() {
-        waitForElement(paymentLogos);
-        return paymentLogos.isDisplayed();
+        return waitForElement(paymentLogos).isDisplayed();
     }
 
     public void fillPaymentForm(String phoneNumber, String amount) {
-        phoneField.sendKeys(phoneNumber);
-        amountField.sendKeys(amount);
-        submitButton.click();
+        WebElement phone = waitForElement(phoneField);
+        phone.sendKeys(phoneNumber);
+
+        WebElement amountFld = waitForElement(amountField);
+        amountFld.sendKeys(amount);
+
+        waitForElement(submitButton).click();
     }
 
     public void clickMoreInfoLink() {
-        waitAndClick(moreInfoLink);
+        waitForElement(moreInfoLink).click();
     }
 
+    // выбор списка опций
     public void selectServiceOption(String optionName) {
-        // Открываем выпадающий список
-        waitAndClick(serviceDropdown);
+        waitForElement(serviceDropdown).click();
 
-        // Проходим по списку опций и выбираем нужную
-        for (WebElement option : serviceOptions) {
-            if (option.getText().equalsIgnoreCase("домашний интернет")) {
+        List<WebElement> options = driver.findElements(By.className("select__option"));
+
+        for (WebElement option : options) {
+            if (option.getText().equalsIgnoreCase(optionName)) {
                 option.click();
                 break;
             }
@@ -109,48 +86,44 @@ public class MTSMainPage extends BasePage {
     }
 
     public String getPhonePlaceholder() {
-        return phoneField.getAttribute("placeholder");
+        return waitForElement(phoneField).getAttribute("placeholder");
     }
 
     public String getAmountPlaceholder() {
-        return amountField.getAttribute("placeholder");
+        return waitForElement(amountField).getAttribute("placeholder");
     }
 
-    public void PayButtonClick() {
-        PayButton.click();
+    /*public void payButtonClick() {
+        waitForElement(payButton).click()
     }
 
-    public String PaymentCheckTop() {
-        return PaymentCheckTop.getAttribute("span"); //починить
+    public String getPaymentCheckTopText() {
+        return waitForElement(paymentCheckTop)
     }
 
-    // проверка номера
-    public String PaymentNumber(); {
-        return PaymentNumber.getAttribute("span"); //починить
+    public String getPaymentNumberText() {
+        return waitForElement(paymentNumber)
     }
 
-    // проверка поля карты
-    public void PaymentCard(); {
-        return PaymentCard.getAttribute("placeholder");
+    public String getPaymentCardPlaceholder() {
+        return waitForElement(paymentCard)
     }
 
-    // проверка поля срока действия
-    public void PaymentValidTill(); {
-        return PaymentValidTill.getAttribute("placeholder");
+    public String getPaymentValidTillPlaceholder() {
+        return waitForElement(paymentValidTill)
     }
 
-    // проверка поля CVC
-    public void PaymentCVC(); {
-        return PaymentCVC.getAttribute("placeholder");
+    public String getPaymentCVCPlaceholder() {
+        return waitForElement(paymentCVC)
     }
 
-    // Проверка поля Держателя
-    public void PaymentCardholder(); {
-        return PaymentCardholder.getAttribute("placeholder");
+    public String getPaymentCardholderPlaceholder() {
+        return waitForElement(paymentCardholder)
     }
 
-    // Проверка суммы оплаты на кнопке
-    public void PaymentCheckButton(); {
-        return PaymentCheckButton.getAttribute("placeholder");
-    }
+    public String getPaymentCheckButtonText() {
+        return waitForElement(paymentCheckButton)
+    }*/
+
+
 }

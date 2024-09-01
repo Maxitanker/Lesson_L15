@@ -4,55 +4,65 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class TestMTS {
+
     private WebDriver driver;
     private MTSMainPage mtsMainPage;
 
-    @BeforeEach
-    public void setup() {
+    @BeforeAll
+    public void setupClass() {
         WebDriverManager.chromedriver().setup();
+    }
+
+    @BeforeEach
+    public void setupTest() {
         driver = new ChromeDriver();
         driver.get("https://www.mts.by/?hash-offset=70&hash-dur=1300#pay-section");
         mtsMainPage = new MTSMainPage(driver);
         mtsMainPage.acceptCookies();
     }
 
-    /*@AfterEach
-    public void tearDown() {
+    @AfterEach
+    public void teardown() {
         if (driver != null) {
             driver.quit();
         }
-    }*/
+    }
 
     @Test
     @DisplayName("Проверка заголовка внутри страницы")
     public void testHeaderElement() {
-        String headerEx = "Онлайн пополнение\n" + "без комиссии";
-        String headerAc = mtsMainPage.getHeaderText();
-        assertEquals(headerEx, headerAc);
+        String expectedHeader = "Онлайн пополнение\nбез комиссии";
+        String actualHeader = mtsMainPage.getHeaderText();
+        assertEquals(expectedHeader, actualHeader);
     }
 
     @Test
     @DisplayName("Проверка наличия иконок платежных систем")
-    public void testPaymentPics() {
-        assertTrue(mtsMainPage.arePaymentLogosDisplayed());
+    public void testPaymentLogosDisplayed() {
+        assertTrue(mtsMainPage.arePaymentLogosDisplayed(), "Логотипы платежных систем не отображаются.");
     }
 
     @Test
     @DisplayName("Заполнение данных для оплаты")
-    public void phone() {
+    public void testFillPaymentForm() {
         mtsMainPage.fillPaymentForm("297777777", "100");
+        // Можно добавить проверки после заполнения формы, если требуется.
     }
 
     @Test
     @DisplayName("Проверка ссылки 'Подробнее о сервисе'")
-    public void testURL() {
+    public void testMoreInfoLink() {
         mtsMainPage.clickMoreInfoLink();
+        // Можно добавить проверку перехода на новую страницу.
     }
 
     @ParameterizedTest
@@ -63,8 +73,8 @@ public class TestMTS {
             "задолженность, Номер телефона, Сумма"
     })
     @DisplayName("Проверка надписей в незаполненных полях")
-    public void testPlaceholders(String serviceOptions, String expectedPhonePlaceholder, String expectedAmountPlaceholder) {
-        mtsMainPage.selectServiceOption(serviceOptions);
+    public void testPlaceholders(String serviceOption, String expectedPhonePlaceholder, String expectedAmountPlaceholder) {
+        mtsMainPage.selectServiceOption(serviceOption);
 
         String actualPhonePlaceholder = mtsMainPage.getPhonePlaceholder();
         String actualAmountPlaceholder = mtsMainPage.getAmountPlaceholder();
@@ -73,55 +83,26 @@ public class TestMTS {
         assertEquals(expectedAmountPlaceholder, actualAmountPlaceholder);
     }
 
+
     @Test
     @DisplayName("Проверка данных в окне оплаты")
-    @CsvSource({"100", "297777777", "Номер карты", "Срок действия", "CVC", "Имя держателя", "100"})
-    public void testPaymentAfterPaymentInfo() {
-        mtsMainPage.fillPaymentForm("297777777", "100");
-        mtsMainPage.PayButtonClick();
-
-        // проверка суммы оплаты вверху окна
-        mtsMainPage.PaymentCheckTop();
-        String PaymentCheckTopEx = "100";
-        String PaymentCheckTopAc = "100";
-        assertEquals(PaymentCheckTopEx, PaymentCheckTopAc);
-
-        // проверка номера
-        mtsMainPage.PaymentNumber();
-        String PaymentNumberEx = "100";
-        String PaymentNumberAc = mtsMainPage.getHeaderText(); // не забыть удалить
-        assertEquals(PaymentNumberEx, PaymentNumberAc);
-
-        // проверка поля карты
-        mtsMainPage.PaymentCard();
-        String PaymentCardEx = "100";
-        String PaymentCardAc = "100";
-        assertEquals(PaymentCardEx, PaymentCardAc);
-
-        // проверка поля срока действия
-        mtsMainPage.PaymentValidTill();
-        String PaymentValidTillEx = "100";
-        String PaymentValidTillAc = "100";
-        assertEquals(PaymentValidTillEx, PaymentValidTillAc);
-
-        // проверка поля CVC
-        mtsMainPage.PaymentCVC();
-        String PaymentCVCEx = "100";
-        String PaymentCVCAc = "100";
-        assertEquals(PaymentCVCEx, PaymentCVCAc);
-
-        // Проверка поля Держателя
-        mtsMainPage.PaymentCardholder();
-        String PaymentCardholderEx = "100";
-        String PaymentCardholderAc = "100";
-        assertEquals(PaymentCardholderEx, PaymentCardholderAc);
-
-        // Проверка суммы оплаты на кнопке
-        mtsMainPage.PaymentCheckButton();
-        String PaymentCheckButtonEx = "100";
-        String PaymentCheckButtonAc = "100";
-        assertEquals(PaymentCheckButtonEx, PaymentCheckButtonAc);
+    public void testPaymentAfterFormSubmission() {
+        driver.findElement(By.id("connection-phone")).click();
+        driver.findElement(By.id("connection-phone")).clear();
+        driver.findElement(By.id("connection-phone")).sendKeys("(29)777-77-77");
+        driver.findElement(By.id("connection-sum")).click();
+        driver.findElement(By.id("connection-sum")).clear();
+        driver.findElement(By.id("connection-sum")).sendKeys("100");
+        driver.findElement(By.xpath("//form[@id='pay-connection']/button")).click();
+        driver.switchTo().frame(1);
+        assertEquals("100.00 BYN", driver.findElement(By.className("pay-description__cost")).getText());
+        assertEquals("Номер карты", driver.findElement(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='или используйте карту'])[1]/following::div[5]")).getText());
+        assertEquals("Оплата: Услуги связи\nНомер:375297777777", driver.findElement(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='или используйте карту'])[1]/preceding::span[2]")).getText());
+        assertEquals("Номер карты", driver.findElement(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='или используйте карту'])[1]/following::div[3]")).getText());
+        assertEquals("Срок действия", driver.findElement(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='Номер карты'])[1]/following::div[9]")).getText());
+        assertEquals("CVC", driver.findElement(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='Срок действия'])[1]/following::div[4]")).getText());
+        assertEquals("Имя держателя (как на карте)", driver.findElement(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='CVC'])[1]/following::div[4]")).getText());
+        assertEquals("Имя держателя (как на карте)", driver.findElement(By.className("colored disabled")).getText());
     }
-
-
 }
+
