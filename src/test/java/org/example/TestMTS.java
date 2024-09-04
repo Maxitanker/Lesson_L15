@@ -7,11 +7,12 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.support.ui.ExpectedConditions;
+import io.qameta.allure.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Feature("Тесты для проверки страницы MTS")
 public class TestMTS {
 
     private WebDriver driver;
@@ -39,6 +40,8 @@ public class TestMTS {
 
     @Test
     @DisplayName("Проверка заголовка внутри страницы")
+    @Description("Проверка правильности отображения заголовка на главной странице MTS")
+    @Severity(SeverityLevel.MINOR)
     public void testHeaderElement() {
         String expectedHeader = "Онлайн пополнение\nбез комиссии";
         String actualHeader = mtsMainPage.getHeaderText();
@@ -47,22 +50,26 @@ public class TestMTS {
 
     @Test
     @DisplayName("Проверка наличия иконок платежных систем")
+    @Description("Проверка отображения всех логотипов платежных систем на главной странице")
+    @Severity(SeverityLevel.NORMAL)
     public void testPaymentLogosDisplayed() {
         assertTrue(mtsMainPage.arePaymentLogosDisplayed(), "Логотипы платежных систем не отображаются.");
     }
 
     @Test
     @DisplayName("Заполнение данных для оплаты")
+    @Description("Заполнение формы оплаты на странице MTS")
+    @Severity(SeverityLevel.BLOCKER)
     public void testFillPaymentForm() {
         mtsMainPage.fillPaymentForm("297777777", "100");
-        // Можно добавить проверки после заполнения формы, если требуется.
     }
 
     @Test
     @DisplayName("Проверка ссылки 'Подробнее о сервисе'")
+    @Description("Проверка работы ссылки 'Подробнее о сервисе' на главной странице")
+    @Severity(SeverityLevel.NORMAL)
     public void testMoreInfoLink() {
         mtsMainPage.clickMoreInfoLink();
-        // Можно добавить проверку перехода на новую страницу.
     }
 
     @ParameterizedTest
@@ -73,6 +80,8 @@ public class TestMTS {
             "задолженность, Номер телефона, Сумма"
     })
     @DisplayName("Проверка надписей в незаполненных полях")
+    @Description("Проверка отображения плейсхолдеров в незаполненных полях для различных типов услуг")
+    @Severity(SeverityLevel.NORMAL)
     public void testPlaceholders(String serviceOption, String expectedPhonePlaceholder, String expectedAmountPlaceholder) {
         mtsMainPage.selectServiceOption(serviceOption);
 
@@ -83,9 +92,10 @@ public class TestMTS {
         assertEquals(expectedAmountPlaceholder, actualAmountPlaceholder);
     }
 
-
     @Test
     @DisplayName("Проверка данных в окне оплаты")
+    @Description("Проверка правильности данных в окне подтверждения оплаты")
+    @Severity(SeverityLevel.BLOCKER)
     public void testPaymentAfterFormSubmission() {
         driver.findElement(By.id("connection-phone")).click();
         driver.findElement(By.id("connection-phone")).clear();
@@ -105,4 +115,3 @@ public class TestMTS {
         assertEquals("Имя держателя (как на карте)", driver.findElement(By.className("colored disabled")).getText());
     }
 }
-
