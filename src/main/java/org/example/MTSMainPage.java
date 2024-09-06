@@ -17,15 +17,6 @@ public class MTSMainPage extends BasePage {
     private By submitButton = By.cssSelector("#pay-connection > button");
     private By moreInfoLink = By.linkText("Подробнее о сервисе");
     private By serviceDropdown = By.className("select__header");
-    /*private By serviceOptions = By.className("select__header");
-    private By payButton = By.xpath("//*[@id=\"pay-internet\"]/button");
-    private By paymentCheckTop = By.className("pay-description__cost");
-    private By paymentNumber = By.xpath("/html/body/app-root/div/div/div/app-payment-container/section/div/div/div[2]/span");
-    private By paymentCard = By.id("cc-number");
-    private By paymentValidTill = By.name("expirationDate");
-    private By paymentCVC = By.name("verification_value");
-    private By paymentCardholder = By.name("cc-name");
-    private By paymentCheckButton = By.cssSelector(".colored.disabled");*/
 
     public MTSMainPage(WebDriver driver) {
         super(driver);
@@ -92,38 +83,6 @@ public class MTSMainPage extends BasePage {
     public String getAmountPlaceholder() {
         return waitForElement(amountField).getAttribute("placeholder");
     }
-
-    /*public void payButtonClick() {
-        waitForElement(payButton).click()
-    }
-
-    public String getPaymentCheckTopText() {
-        return waitForElement(paymentCheckTop)
-    }
-
-    public String getPaymentNumberText() {
-        return waitForElement(paymentNumber)
-    }
-
-    public String getPaymentCardPlaceholder() {
-        return waitForElement(paymentCard)
-    }
-
-    public String getPaymentValidTillPlaceholder() {
-        return waitForElement(paymentValidTill)
-    }
-
-    public String getPaymentCVCPlaceholder() {
-        return waitForElement(paymentCVC)
-    }
-
-    public String getPaymentCardholderPlaceholder() {
-        return waitForElement(paymentCardholder)
-    }
-
-    public String getPaymentCheckButtonText() {
-        return waitForElement(paymentCheckButton)
-    }*/
 
 
 }
