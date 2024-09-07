@@ -8,6 +8,10 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import io.qameta.allure.*;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -103,15 +107,16 @@ public class TestMTS {
         driver.findElement(By.id("connection-sum")).click();
         driver.findElement(By.id("connection-sum")).clear();
         driver.findElement(By.id("connection-sum")).sendKeys("100");
+        new WebDriverWait(driver, Duration.ofSeconds(10));
         driver.findElement(By.xpath("//form[@id='pay-connection']/button")).click();
-        driver.switchTo().frame(1);
-        assertEquals("100.00 BYN", driver.findElement(By.className("pay-description__cost")).getText());
-        assertEquals("Номер карты", driver.findElement(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='или используйте карту'])[1]/following::div[5]")).getText());
-        assertEquals("Оплата: Услуги связи\nНомер:375297777777", driver.findElement(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='или используйте карту'])[1]/preceding::span[2]")).getText());
-        assertEquals("Номер карты", driver.findElement(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='или используйте карту'])[1]/following::div[3]")).getText());
-        assertEquals("Срок действия", driver.findElement(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='Номер карты'])[1]/following::div[9]")).getText());
-        assertEquals("CVC", driver.findElement(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='Срок действия'])[1]/following::div[4]")).getText());
-        assertEquals("Имя держателя (как на карте)", driver.findElement(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='CVC'])[1]/following::div[4]")).getText());
-        assertEquals("Имя держателя (как на карте)", driver.findElement(By.className("colored disabled")).getText());
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
+        driver.switchTo().frame(wait.until(ExpectedConditions.visibilityOf(driver.findElement(By.xpath("//iframe[@class='bepaid-iframe']")))));
+        assertEquals("100.00 BYN", driver.findElement(By.xpath("//div[@class='pay-description__cost']/span")).getAttribute("textContent"));
+        assertEquals("Номер карты", driver.findElement(By.xpath("(//div[@class='content ng-tns-c46-1'])[1]")).getAttribute("textContent"));
+        assertEquals("Оплата: Услуги связи\nНомер:375297777777", driver.findElement(By.xpath("//span[contains(text(),':')]")).getAttribute("textContent"));
+        assertEquals("Срок действия", driver.findElement(By.xpath("(//div[@class='content ng-tns-c46-4'])[1]")).getAttribute("textContent"));
+        assertEquals("CVC", driver.findElement(By.xpath("(//div[@class='content ng-tns-c46-5'])[1]")).getAttribute("textContent"));
+        assertEquals("Имя держателя (как на карте)", driver.findElement(By.xpath("(//div[@class='content ng-tns-c46-3'])[1]")).getAttribute("textContent"));
     }
 }
